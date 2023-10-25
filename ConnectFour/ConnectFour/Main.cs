@@ -29,12 +29,14 @@ namespace ConnectFour
             _graphics.PreferredBackBufferWidth = 1280;
             _graphics.PreferMultiSampling = false;
         }
-
+        const int NUM_ROWS = 6;
+        const int NUM_COLUMNS = 7;
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
 
-            _gameBoard = new GameBoard(7, 6, Window.ClientBounds.Size, out PIECE_SIZE);
+            _gameBoard = new GameBoard(NUM_COLUMNS, NUM_ROWS, Window.ClientBounds.Size, out PIECE_SIZE);
+            gameRectangle = new Rectangle(0, 0, NUM_COLUMNS, NUM_ROWS);
 
             oldState = new();
             IsYellowsTurn = true;
@@ -80,7 +82,25 @@ namespace ConnectFour
                 if (FindSuitableColumn(mouseState.Position, out Point location))
                 {
                     _gameBoard.GameState[location.X, location.Y].State = IsYellowsTurn ? 1 : 2;
-                    IsYellowsTurn = !IsYellowsTurn;
+                    int game_state = TestWinCondition(location);
+                    switch (game_state)
+                    {
+                        case 1:
+                            Exit();
+                            break;
+
+                        case 2:
+                            Exit();
+                            break;
+
+                        case 3:
+                            break;
+
+                        default:
+                            IsYellowsTurn = !IsYellowsTurn;
+                            break;
+                    }
+
                 }
             }
 
@@ -151,24 +171,96 @@ namespace ConnectFour
         /// <returns>Returns if the game has been won. <br/>0: Game is ongoing. <br/>1: Yellow (player 1) has won. <br/>2: Red (player 2) has won. <br/>3: Neither player has won (draw).</returns>
         protected int TestWinCondition(Point location_to_test)
         {
-            
+            int player = IsYellowsTurn ? 1 : 2;
+            for (int i = 0; i < 4; i++)
+            {
+                if (TestHorizontal(location_to_test - new Point(i, 0), player))
+                {
+                    return player;
+                }
+                if (TestVertical(location_to_test - new Point(0, i), player))
+                {
+                    return player;
+                }
+                if (TestPositiveSlope(location_to_test - new Point(i, i), player))
+                {
+                    return player;
+                }
+                if (TestNegativeSlope(location_to_test - new Point(i, -i), player))
+                {
+                    return player;
+                }
+            }
             return 0;
         }
-        protected void TestHorizontal(Point start_location)
+        protected bool TestHorizontal(Point start_location, int player)
         {
-
+            
+            for (int i = 0; i < 4; i++)
+            {
+                Point test_location = new(start_location.X + i, start_location.Y);
+                // If point is outside the array, quit everything.
+                if (!(0 <= test_location.X && test_location.X < NUM_COLUMNS))
+                {
+                    return false;
+                }
+                if (_gameBoard.GameState[test_location.X, test_location.Y].State != player)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
-        protected void TestVertical(Point start_location)
+        protected bool TestVertical(Point start_location, int player)
         {
-           
+            for (int i = 0; i < 4; i++)
+            {
+                Point test_location = new(start_location.X, start_location.Y + i);
+                // If point is outside the array, quit everything.
+                if (!(0 <= test_location.Y && test_location.Y < NUM_ROWS))
+                {
+                    return false;
+                }
+                if (_gameBoard.GameState[test_location.X, test_location.Y].State != player)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
-        protected void TestPositiveSlope(Point start_location)
+        protected bool TestPositiveSlope(Point start_location, int player)
         {
-
+            for (int i = 0; i < 4; i++)
+            {
+                Point test_location = new(start_location.X + i, start_location.Y + i);
+                // If point is outside the array, quit everything.
+                if (!(0 <= test_location.X && test_location.X < NUM_COLUMNS) || !(0 <= test_location.Y && test_location.Y < NUM_ROWS))
+                {
+                    return false;
+                }
+                if (_gameBoard.GameState[test_location.X, test_location.Y].State != player)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
-        protected void TestNegativeSlope(Point start_location)
+        protected bool TestNegativeSlope(Point start_location, int player)
         {
-
+            for (int i = 0; i < 4; i++)
+            {
+                Point test_location = new(start_location.X + i, start_location.Y - i);
+                // If point is outside the array, quit everything.
+                if (!(0 <= test_location.X && test_location.X < NUM_COLUMNS) || !(0 <= test_location.Y && test_location.Y < NUM_ROWS))
+                {
+                    return false;
+                }
+                if (_gameBoard.GameState[test_location.X, test_location.Y].State != player)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }
