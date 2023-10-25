@@ -77,7 +77,7 @@ namespace ConnectFour
             if (mouseState.LeftButton == ButtonState.Pressed && oldState.LeftButton != ButtonState.Pressed)
             {
                 // If this returns true, spawn a piece! Otherwise... don't.
-                if (FindSuitableColumn(mouseState, out Point location))
+                if (FindSuitableColumn(mouseState.Position, out Point location))
                 {
                     _gameBoard.GameState[location.X, location.Y].State = IsYellowsTurn ? 1 : 2;
                     IsYellowsTurn = !IsYellowsTurn;
@@ -105,12 +105,18 @@ namespace ConnectFour
 
             base.Draw(gameTime);
         }
-        protected bool FindSuitableColumn(MouseState mouseState, out Point new_piece)
+        /// <summary>
+        /// Finds the column the piece should be dropped in. Only executes code if the column wasn't empty, and <see cref="FindEmptyRow"/> returns true.
+        /// </summary>
+        /// <param name="mousePos">Window coordinates of the mouse on click.</param>
+        /// <param name="new_piece">Array coordinates of the new piece to be dropped.</param>
+        /// <returns>Whether the piece should be dropped. <see cref="FindEmptyRow"/> must also return true for this function to return true.</returns>
+        protected bool FindSuitableColumn(Point mousePos, out Point new_piece)
         {
             for (int col = 0; col < _gameBoard.GameState.GetLength(0); col++)
             {
                 Rectangle bounds = _gameBoard.GameState[col, 0].Bounds;
-                if (bounds.Left <= mouseState.X && mouseState.X <= bounds.Right)
+                if (bounds.Left <= mousePos.X && mousePos.X <= bounds.Right)
                 {
                     // FindEmptyRow returns true if a piece was spawned. Otherwise, it returns false.
                     if (FindEmptyRow(col, out new_piece)) return true;
@@ -119,6 +125,12 @@ namespace ConnectFour
             new_piece = new(0, 0);
             return false;
         }
+        /// <summary>
+        /// Determines if the given column <paramref name="new_piece"/> is empty. If it is empty, then a piece will be dropped.
+        /// </summary>
+        /// <param name="this_column">The column to check.</param>
+        /// <param name="new_piece">Array coordinates of the new piece to be dropped.</param>
+        /// <returns>Whether the piece should be dropped.</returns>
         protected bool FindEmptyRow(int this_column, out Point new_piece)
         {
             for (int row = _gameBoard.GameState.GetLength(1) - 1; row >= 0; row--)
@@ -132,7 +144,29 @@ namespace ConnectFour
             new_piece = new(0, 0);
             return false;
         }
-        protected void TestWinCondition()
+        /// <summary>
+        /// Determines if the game has been one, and by whom.
+        /// </summary>
+        /// <param name="location_to_test"></param>
+        /// <returns>Returns if the game has been won. <br/>0: Game is ongoing. <br/>1: Yellow (player 1) has won. <br/>2: Red (player 2) has won. <br/>3: Neither player has won (draw).</returns>
+        protected int TestWinCondition(Point location_to_test)
+        {
+            
+            return 0;
+        }
+        protected void TestHorizontal(Point start_location)
+        {
+
+        }
+        protected void TestVertical(Point start_location)
+        {
+           
+        }
+        protected void TestPositiveSlope(Point start_location)
+        {
+
+        }
+        protected void TestNegativeSlope(Point start_location)
         {
 
         }
