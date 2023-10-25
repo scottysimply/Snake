@@ -14,6 +14,10 @@ namespace ConnectFour
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+        private GameBoard _gameBoard;
+
+        public bool IsYellowsTurn { get; set; }
+
         public ConnectFourGame()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -23,51 +27,114 @@ namespace ConnectFour
             // Initialize bounds.
             _graphics.PreferredBackBufferHeight = 720;
             _graphics.PreferredBackBufferWidth = 1280;
+            _graphics.PreferMultiSampling = false;
         }
 
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
 
+            _gameBoard = new GameBoard(7, 6, Window.ClientBounds.Size, out PIECE_SIZE);
+
+            oldState = new();
+            IsYellowsTurn = true;
+
+
             base.Initialize();
         }
-        protected Texture2D EmptySpace;
-        protected Texture2D PlayerToken;
-        protected Texture2D RedToken;
-        protected Texture2D YellowToken;
+        internal static Texture2D EmptySpace;
+        internal static Texture2D PlayerToken;
+        internal static Texture2D RedToken;
+        internal static Texture2D YellowToken;
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            // TODO: use this.Content to load your game content here
-            EmptySpace = Content.Load<Texture2D>("Content/EmptySpace");
-            PlayerToken = Content.Load<Texture2D>("Content/PlayerToken");
-            RedToken = Content.Load<Texture2D>("Content/RedPiece");
-            YellowToken = Content.Load<Texture2D>("Content/YellowPiece");
+            
+            // My images.
+            EmptySpace = Content.Load<Texture2D>("EmptySpace");
+            PlayerToken = Content.Load<Texture2D>("PlayerToken");
+            RedToken = Content.Load<Texture2D>("RedPiece");
+            YellowToken = Content.Load<Texture2D>("YellowPiece");
         }
-
+        MouseState oldState;
+        /// <summary>
+        /// Width and height of the piece, in pixels.
+        /// </summary>
+        public int PIECE_SIZE;
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
 
 
+            // // // // BEGIN MOUSE LOGIC
+            
+            // Prelim: Capture mouse state
+            var mouseState = Mouse.GetState();
+
+            // Check if mouse is pressed
+            if (mouseState.LeftButton == ButtonState.Pressed && oldState.LeftButton != ButtonState.Pressed)
+            {
+                // If this returns true, spawn a piece! Otherwise... don't.
+                if (FindSuitableColumn(mouseState, out Point location))
+                {
+                    _gameBoard.GameState[location.X, location.Y].State = IsYellowsTurn ? 1 : 2;
+                    IsYellowsTurn = !IsYellowsTurn;
+                }
+            }
 
 
+            // // // // END MOUSE LOGIC
+
+            // Update old mouse state.
+            oldState = mouseState;
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+            _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+
+            _gameBoard.Draw(_spriteBatch);
 
             // TODO: Add your drawing code here
 
-
-
+            _spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+        protected bool FindSuitableColumn(MouseState mouseState, out Point new_piece)
+        {
+            for (int col = 0; col < _gameBoard.GameState.GetLength(0); col++)
+            {
+                Rectangle bounds = _gameBoard.GameState[col, 0].Bounds;
+                if (bounds.Left <= mouseState.X && mouseState.X <= bounds.Right)
+                {
+                    // FindEmptyRow returns true if a piece was spawned. Otherwise, it returns false.
+                    if (FindEmptyRow(col, out new_piece)) return true;
+                }
+            }
+            new_piece = new(0, 0);
+            return false;
+        }
+        protected bool FindEmptyRow(int this_column, out Point new_piece)
+        {
+            for (int row = _gameBoard.GameState.GetLength(1) - 1; row >= 0; row--)
+            {
+                if (_gameBoard.GameState[this_column, row].State == 0)
+                {
+                    new_piece = new(this_column, row);
+                    return true;
+                }
+            }
+            new_piece = new(0, 0);
+            return false;
+        }
+        protected void TestWinCondition()
+        {
+
         }
     }
 }
