@@ -36,7 +36,6 @@ namespace ConnectFour
             // TODO: Add your initialization logic here
 
             _gameBoard = new GameBoard(NUM_COLUMNS, NUM_ROWS, Window.ClientBounds.Size, out PIECE_SIZE);
-            gameRectangle = new Rectangle(0, 0, NUM_COLUMNS, NUM_ROWS);
 
             oldState = new();
             IsYellowsTurn = true;
