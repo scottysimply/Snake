@@ -8,16 +8,15 @@ namespace ConnectFour
         /// <summary>
         /// This is the state of the game. 0's indicate empty cells, 1's indicate Yellow (player 1)'s pieces, and 2 represents red's pieces.
         /// </summary>
-        
         public Cell[,] GameState { get; set; }
         /// <summary>
         /// Padding given to each element in the game board, in pixels.
         /// </summary>
-        const int PADDING = 4;
+        public const int PADDING = 4;
         /// <summary>
         /// Margins surrounding the game board, in pixels.
         /// </summary>
-        const int MARGINS = 16;
+        public const int MARGINS = 16;
         
         public int Cell_Size { get; set; }
 
