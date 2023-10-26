@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ConnectFour.UI;
 
 namespace ConnectFour
 {
@@ -14,9 +15,11 @@ namespace ConnectFour
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        private GameBoard _gameBoard;
+        private static GameBoard _gameBoard;
 
-        public bool IsYellowsTurn { get; set; }
+        private static GameEndForm _gameEndForm;
+
+        public static bool IsYellowsTurn { get; set; }
 
         public ConnectFourGame()
         {
@@ -24,9 +27,12 @@ namespace ConnectFour
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
+            // SIZE OF THE GAME!!!
+            Point gameSize = new Point(1280, 720);
+
             // Initialize bounds.
-            _graphics.PreferredBackBufferHeight = 720;
-            _graphics.PreferredBackBufferWidth = 1280;
+            _graphics.PreferredBackBufferHeight = gameSize.Y * 2;
+            _graphics.PreferredBackBufferWidth = gameSize.X * 2;
             _graphics.PreferMultiSampling = false;
         }
         const int NUM_ROWS = 6;
@@ -36,6 +42,7 @@ namespace ConnectFour
             // TODO: Add your initialization logic here
 
             _gameBoard = new GameBoard(NUM_COLUMNS, NUM_ROWS, Window.ClientBounds.Size, out PIECE_SIZE);
+            _gameEndForm = new(_gameBoard.Bounds.Center, (_gameBoard.Bounds.Size.ToVector2() * 0.66f).ToPoint());
 
             oldState = new();
             IsYellowsTurn = true;
@@ -47,6 +54,8 @@ namespace ConnectFour
         internal static Texture2D PlayerToken;
         internal static Texture2D RedToken;
         internal static Texture2D YellowToken;
+        internal static Texture2D BlankSquare;
+        internal static SpriteFont Trebuchet;
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -56,18 +65,34 @@ namespace ConnectFour
             PlayerToken = Content.Load<Texture2D>("PlayerToken");
             RedToken = Content.Load<Texture2D>("RedPiece");
             YellowToken = Content.Load<Texture2D>("YellowPiece");
+            BlankSquare = Content.Load<Texture2D>("BlankSquare");
+            Trebuchet = Content.Load<SpriteFont>("Trebuchet");
+
         }
         MouseState oldState;
+        public static bool blockInput;
+        public static int blockInputTimer;
         /// <summary>
         /// Width and height of the piece, in pixels.
         /// </summary>
-        public int PIECE_SIZE;
+        public static int PIECE_SIZE;
+
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            // Check to see if we can update the form:
+            _gameEndForm.Update();
 
+            if (blockInputTimer > 0)
+            {
+                blockInputTimer--;
+            }
+            else
+            {
+                blockInput = false;
+            }
 
             // // // // BEGIN MOUSE LOGIC
             
@@ -75,8 +100,19 @@ namespace ConnectFour
             var mouseState = Mouse.GetState();
 
             // Check if mouse is pressed
-            if (mouseState.LeftButton == ButtonState.Pressed && oldState.LeftButton != ButtonState.Pressed)
+            if (mouseState.LeftButton == ButtonState.Pressed && oldState.LeftButton != ButtonState.Pressed && !blockInput)
             {
+                // Button has been clicked on;
+                if (_gameEndForm.Enabled)
+                {
+                    if (_gameEndForm.ResetButton.Bounds.Contains(mouseState.Position))
+                    {
+                        _gameEndForm.ResetButton.OnClick();
+                    }
+                    return;
+                }
+
+
                 // If this returns true, spawn a piece! Otherwise... don't.
                 if (FindSuitableColumn(mouseState.Position, out Point location))
                 {
@@ -85,17 +121,19 @@ namespace ConnectFour
                     switch (game_state)
                     {
                         case 1:
-                            Exit();
+                            _gameEndForm.CurrentState = GameStateSettings.YellowWin;
                             break;
 
                         case 2:
-                            Exit();
+                            _gameEndForm.CurrentState = GameStateSettings.RedWin;
                             break;
 
                         case 3:
+                            _gameEndForm.CurrentState = GameStateSettings.Draw;
                             break;
 
                         default:
+                            _gameEndForm.CurrentState = GameStateSettings.Ongoing;
                             IsYellowsTurn = !IsYellowsTurn;
                             break;
                     }
@@ -105,6 +143,7 @@ namespace ConnectFour
 
 
             // // // // END MOUSE LOGIC
+
 
             // Update old mouse state.
             oldState = mouseState;
@@ -117,6 +156,8 @@ namespace ConnectFour
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
             _gameBoard.Draw(_spriteBatch);
+
+            _gameEndForm.Draw(_spriteBatch);
 
             // TODO: Add your drawing code here
 
@@ -260,6 +301,23 @@ namespace ConnectFour
                 }
             }
             return true;
+        }
+        public static void ResetGame()
+        {
+            for (int y = 0; y < _gameBoard.GameState.GetLength(1); y++)
+            {
+                for (int x = 0; x < _gameBoard.GameState.GetLength(0); x++)
+                {
+                    _gameBoard.GameState[x, y] = new Cell(GameBoard.MARGINS + GameBoard.PADDING + (x * PIECE_SIZE) + (x * 2 * GameBoard.PADDING), GameBoard.MARGINS + GameBoard.PADDING + (y * PIECE_SIZE) + (y * 2 * GameBoard.PADDING), PIECE_SIZE, PIECE_SIZE);
+                }
+            }
+            _gameEndForm.Enabled = false;
+            blockInput = true;
+            blockInputTimer = 30;
+            _gameEndForm.ResetButton.Enabled = false;
+            _gameEndForm.CurrentState = GameStateSettings.Ongoing;
+
+            IsYellowsTurn = true;
         }
     }
 }
