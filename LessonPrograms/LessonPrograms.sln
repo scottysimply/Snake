@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlastOff", "BlastOff\BlastO
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrootLoops", "FrootLoops\FrootLoops.csproj", "{C6D41432-68CB-42AE-A6A3-9EEB45C10C77}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlippingOut", "FlippingOut\FlippingOut.csproj", "{A3266F7D-72E1-49DA-B172-569AF6C3AB45}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrickOrTreatConsole", "TrickOrTreatConsole\TrickOrTreatConsole.csproj", "{699C4F62-A1BF-4AC4-8CC0-903E7C556CE8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{C6D41432-68CB-42AE-A6A3-9EEB45C10C77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6D41432-68CB-42AE-A6A3-9EEB45C10C77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6D41432-68CB-42AE-A6A3-9EEB45C10C77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3266F7D-72E1-49DA-B172-569AF6C3AB45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3266F7D-72E1-49DA-B172-569AF6C3AB45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3266F7D-72E1-49DA-B172-569AF6C3AB45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3266F7D-72E1-49DA-B172-569AF6C3AB45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{699C4F62-A1BF-4AC4-8CC0-903E7C556CE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{699C4F62-A1BF-4AC4-8CC0-903E7C556CE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{699C4F62-A1BF-4AC4-8CC0-903E7C556CE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{699C4F62-A1BF-4AC4-8CC0-903E7C556CE8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
