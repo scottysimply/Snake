@@ -23,7 +23,7 @@ namespace OddOrEven
                     condition = false;
                 }
                 else
-                {das
+                {
                     Console.WriteLine("No number detected. Try again.");
                 }
 
