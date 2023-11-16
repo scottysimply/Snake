@@ -9,6 +9,8 @@ namespace Snake
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+        public InputHandler GameInput { get; set; }
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -32,10 +34,15 @@ namespace Snake
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            // Read keyboard input:
+            GameInput.QueryInput();
 
-            // TODO: Add your update logic here
+            // Add killswitch activated via escape:
+            if (GameInput.IsKeyHeld(Keys.Escape))
+            {
+                Exit();
+            }
+
 
             base.Update(gameTime);
         }
