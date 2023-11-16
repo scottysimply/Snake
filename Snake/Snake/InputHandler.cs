@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Snake
 {
-    internal class ControlHandler
+    internal class InputHandler
     {
+
     }
 }
