@@ -4,6 +4,6 @@ namespace Snake.Components
 {
     public class Player
     {
-        public 
+        
     }
 }
