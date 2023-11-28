@@ -6,6 +6,6 @@ namespace Snake.Components
 {
     public class Apple
     {
-        
+
     }
 }
