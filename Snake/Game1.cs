@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Snake.Components;
-using Snake.Images;
 
 namespace Snake
 {
@@ -19,7 +18,7 @@ namespace Snake
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        public InputHandler GameInput { get; set; }
+        private InputHandler _inputHandler;
 
         public Game1()
         {
@@ -32,28 +31,38 @@ namespace Snake
         {
             // TODO: Add your initialization logic here
 
+            _inputHandler = new();
+
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
+            _graphics.PreferredBackBufferHeight = 1080;
+            _graphics.PreferredBackBufferWidth = 1920;
+            _graphics.ApplyChanges();
+
+
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            
+
             Dimensions = Window.ClientBounds;
+            GameGrid = new(20, 15, Dimensions.Size);
 
             // Load sprites
-            TextureList.TBlankCell = Content.Load<Texture2D>("Images/BlankCell.png");
-            TextureList.TApple = Content.Load<Texture2D>("Images/Apple.png");
-            TextureList.TSnake = Content.Load<Texture2D>("Images/Snake.png");
+            TextureList.TBlankCell = Content.Load<Texture2D>("BlankCell");
+            TextureList.TApple = Content.Load<Texture2D>("Apple");
+            TextureList.TSnake = Content.Load<Texture2D>("Snake");
         }
 
         protected override void Update(GameTime gameTime)
         {
             // Read keyboard input:
-            GameInput.QueryInput();
+            _inputHandler.QueryInput();
 
             // Add killswitch activated via escape:
-            if (GameInput.IsKeyHeld(Keys.Escape))
+            if (_inputHandler.IsKeyHeld(Keys.Escape))
             {
                 Exit();
             }
@@ -64,11 +73,15 @@ namespace Snake
 
         protected override void Draw(GameTime gameTime)
         {
+            _spriteBatch.Begin();
+
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
+            GameGrid.DrawGrid(_spriteBatch);
 
-            base.Draw(gameTime);
+
+            _spriteBatch.End();
         }
     }
 }
