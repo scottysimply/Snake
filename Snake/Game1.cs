@@ -2,15 +2,14 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Snake.Components;
+using System;
 
 namespace Snake
 {
     public class Game1 : Game
     {
         public Rectangle Dimensions { get; set; }
-        public Grid GameGrid { get; set; }
-
-
+        private Grid _gameGrid;
 
 
 
@@ -48,7 +47,8 @@ namespace Snake
             
 
             Dimensions = Window.ClientBounds;
-            GameGrid = new(20, 15, Dimensions.Size);
+            _gameGrid = new(20, 15, Dimensions.Size);
+
 
             // Load sprites
             TextureList.TBlankCell = Content.Load<Texture2D>("BlankCell");
@@ -66,6 +66,28 @@ namespace Snake
             {
                 Exit();
             }
+            // GAME LOGIC GOES HERE!!!
+
+            // Order of operations for game logic:
+            // Get the currently pressed key.
+            // Compare the pressed key to the snake's direction
+            //      If applicable, change the snake head's direction.
+            // Move the snake head forward.
+            //      Detect if snake overwrote an apple.
+            //          Extend the snake's length if the snake did eat an apple.
+            //      Detect if the snake has crashed.
+            //          End game if the snake has crashed.
+            //      Extend the snake's length via pathfinding (ask Scott about this)
+            // If an apple no longer exists, generate a new one.
+            // Wait a given amount of time
+            // TODO: Make the given amount of time be variable.
+            //
+
+
+            // Create a new apple.
+            AppleGenerator generator = new(ref _gameGrid);
+
+            // END GAME LOGIC!
 
 
             base.Update(gameTime);
@@ -78,7 +100,7 @@ namespace Snake
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
-            GameGrid.DrawGrid(_spriteBatch);
+            _gameGrid.DrawGrid(_spriteBatch);
 
 
             _spriteBatch.End();
