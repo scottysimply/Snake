@@ -1,24 +1,41 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Snake.Images;
 
 namespace Snake.Components
 {
     public class Cell
     {
+        public Rectangle Dimensions;
         /// <summary>
         /// The ID of the cell. See <see cref="LogicIDs"/>.
         /// </summary>
         public LogicIDs ID { get; set; }
-        /// <summary>
-        /// The direction the cell is facing. For the snake, the drawing will be done back to front; from the tail to the head. See <see cref="Direction"/>.
-        /// </summary>
-        public Direction CellDirection { get; set; }
         public Point Coordinates { get; set; }
-        public Vector2 Position { get; set; }
+        public Cell(Rectangle dimensions, Point location)
+        {
+            Dimensions = dimensions;
+            Coordinates = location;
+            ResetCell();
+        }
         public void ResetCell()
         {
-            ID = 0;
-            CellDirection = Direction.North;
+            ID = LogicIDs.Empty;
+        }
+        public void DrawCell(SpriteBatch spriteBatch)
+        {
+            switch (ID)
+            {
+                case LogicIDs.Apple:
+                    spriteBatch.Draw(TextureList.TApple, Dimensions, Color.White);
+                    break;
+                case LogicIDs.Empty:
+                    spriteBatch.Draw(TextureList.TBlankCell, Dimensions, Color.White);
+                    break;
+                default:
+                    spriteBatch.Draw(TextureList.TSnake, Dimensions, Color.White);
+                    break;
+            }
         }
     }
 }
