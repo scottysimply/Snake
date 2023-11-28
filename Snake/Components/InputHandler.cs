@@ -14,10 +14,15 @@ namespace Snake.Components
         /// </summary>
         private KeyboardState _oldState;
 
+        public InputHandler()
+        {
+            _currentState = _oldState = Keyboard.GetState();
+        }
+
         /// <summary>
         /// Gets whether the specified <see cref="Keys"/> is pressed.
         /// </summary>
-        /// <param name="key"></param>
+        /// <param name="keyToCheck"></param>
         /// <returns>Returns true <i>on the tick the key was pressed</i>.</returns>
         public bool IsKeyPressed(Keys keyToCheck)
         {
