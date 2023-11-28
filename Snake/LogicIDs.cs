@@ -10,8 +10,11 @@ namespace Snake
     {
         Empty,
         Apple,
-        Head,
-        Body,
-        Tail,
+        SnakeBody,
+        SnakeTail,
+        SnakeHeadNorth,
+        SnakeHeadSouth,
+        SnakeHeadEast,
+        SnakeHeadWest,
     }
 }
