@@ -11,7 +11,7 @@ namespace Snake
         private Random _rand;
         public AppleGenerator(ref Grid grid)
         {
-
+            
         }
     }
 }

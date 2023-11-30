@@ -78,10 +78,12 @@ namespace Snake
             //      Detect if the snake has crashed.
             //          End game if the snake has crashed.
             //      Extend the snake's length via pathfinding (ask Scott about this)
+            //      In order to perform this, all non-empty cells will have to be investigated. This will be done in tandem with creating an apple.
             // If an apple no longer exists, generate a new one.
             // Wait a given amount of time
             // TODO: Make the given amount of time be variable.
             //
+
 
 
             // Create a new apple.
