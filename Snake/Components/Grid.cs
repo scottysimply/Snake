@@ -38,7 +38,7 @@ namespace Snake.Components
             }
             Size = new(num_cols, num_rows);
         }
-        public void SpawnSnake()
+        public Point SpawnSnake()
         {
             int spawnX = Size.X / 2 + 1 - 4;
             int centerY = Size.Y / 2 + 1;
@@ -46,6 +46,16 @@ namespace Snake.Components
             CellArray[spawnX - 1, centerY].ID = LogicIDs.SnakeHeadEast;
             CellArray[spawnX - 2, centerY].ID = LogicIDs.SnakeBody;
             CellArray[spawnX - 3, centerY].ID = LogicIDs.SnakeBody;
+
+            return CellArray[spawnX - 1, centerY].Coordinates;
+        }
+        public LogicIDs GetIDAtPosition(Point position)
+        {
+            return CellArray[position.X, position.Y].ID;
+        }
+        public void SetIDAtPosition(Point position, LogicIDs ID)
+        {
+            CellArray[position.X, position.Y].ID = ID;
         }
         public void ResetGrid()
         {
