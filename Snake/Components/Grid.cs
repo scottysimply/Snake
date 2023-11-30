@@ -8,6 +8,7 @@ namespace Snake.Components
         public Rectangle Dimensions;
         const int MARGIN = 2;
         public Cell[,] CellArray { get; set; }
+        public Point Size { get; set; }
         public Grid(int num_cols, int num_rows, Point parent_size)
         {
             // Parameters for auto-fitting the cell size.
@@ -35,7 +36,16 @@ namespace Snake.Components
                     CellArray[x, y] = new(cell_dimensions, new Point(x, y));
                 }
             }
+            Size = new(num_cols, num_rows);
+        }
+        public void SpawnSnake()
+        {
+            int spawnX = Size.X / 2 + 1 - 4;
+            int centerY = Size.Y / 2 + 1;
 
+            CellArray[spawnX - 1, centerY].ID = LogicIDs.SnakeHeadEast;
+            CellArray[spawnX - 2, centerY].ID = LogicIDs.SnakeBody;
+            CellArray[spawnX - 3, centerY].ID = LogicIDs.SnakeBody;
         }
         public void ResetGrid()
         {
