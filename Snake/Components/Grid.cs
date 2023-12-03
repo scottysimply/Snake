@@ -44,15 +44,30 @@ namespace Snake.Components
             int centerY = Size.Y / 2 + 1;
 
             CellArray[spawnX - 1, centerY].ID = LogicIDs.SnakeHeadEast;
+            CellArray[spawnX - 1, centerY].WhoAmI = 0;
+
             CellArray[spawnX - 2, centerY].ID = LogicIDs.SnakeBody;
+            CellArray[spawnX - 2, centerY].WhoAmI = 1;
+
             CellArray[spawnX - 3, centerY].ID = LogicIDs.SnakeBody;
+            CellArray[spawnX - 3, centerY].WhoAmI = 2;
 
             return CellArray[spawnX - 1, centerY].Coordinates;
         }
+        /// <summary>
+        /// Retrieves the ID at a given position.
+        /// </summary>
+        /// <param name="position">The position to retrieve the ID of.</param>
+        /// <returns></returns>
         public LogicIDs GetIDAtPosition(Point position)
         {
             return CellArray[position.X, position.Y].ID;
         }
+        /// <summary>
+        /// Given a position in the grid, set the ID at that position to the given ID.
+        /// </summary>
+        /// <param name="position">The position in the grid to set.</param>
+        /// <param name="ID">The ID to set at the given position.</param>
         public void SetIDAtPosition(Point position, LogicIDs ID)
         {
             CellArray[position.X, position.Y].ID = ID;
