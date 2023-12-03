@@ -164,17 +164,21 @@ namespace Snake
             if (facing_ID == LogicIDs.SnakeBody)
             {
                 // TODO: End the game on a loss.
-
             }
 
             // Move the snake head forward.
             _gameGrid.SetIDAtPosition(facing_position, _headDirection);
 
             // Pseudocode for what needs to be done:
-            // Set _playerPosition (which is the old snake position) to be a body piece. Do this with _gameGrid.SetIDAtPosition().
-            // If the facing_id == LogcIDs.Apple
+            // Set _playerPosition (which is the old snake position) to be a LogicIDs.SnakeBody. Do this with _gameGrid.SetIDAtPosition().
+            _gameGrid.SetIDAtPosition(_playerPosition, LogicIDs.SnakeBody);
+            // If the facing_id == LogicIDs.Apple
             //      Increment _snakeLength by 1.
-
+            if (facing_ID == LogicIDs.Apple)
+            {
+                _snakeLength += 1;
+            }
+            
             // Finally, i can talk about the "movement pathfinding" thing I've been hyping up.
             // Each body segment of the snake has something called "WhoAmI." This is an integer that tracks what body segment this is from the snake.
             // The count starts at 0 (following the concept of indices starting at 0), and goes up by one for each body piece the snake extends close to the end.
