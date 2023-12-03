@@ -13,12 +13,14 @@ namespace Snake
 
         private Point _playerPosition;
         private LogicIDs _headDirection;
+        private int _snakeLength;
 
 
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
         private InputHandler _inputHandler;
+        private int _stepTimer;
 
         public Game1()
         {
@@ -32,6 +34,7 @@ namespace Snake
             // TODO: Add your initialization logic here
 
             _inputHandler = new();
+            _stepTimer = 0;
 
             base.Initialize();
         }
@@ -47,6 +50,7 @@ namespace Snake
 
             // Create the initial snake.
             _playerPosition = _gameGrid.SpawnSnake();
+            _snakeLength = 3;
 
             // Initialize the SpriteBatch object (does the rendering)
             _spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -68,6 +72,30 @@ namespace Snake
             {
                 Exit();
             }
+
+            // Run game logic if there is a valid time step for it.
+            if (_stepTimer > 30)
+            {
+                GameLogic(gameTime);
+                _stepTimer = 0;
+            }
+            _stepTimer++;
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            _spriteBatch.Begin();
+
+            GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            // TODO: Add your drawing code here
+            _gameGrid.DrawGrid(_spriteBatch);
+
+
+            _spriteBatch.End();
+        }
+        private void GameLogic(GameTime gameTime)
+        {
             // Get the direction of the snake
             _headDirection = _gameGrid.GetIDAtPosition(_playerPosition);
 
@@ -127,6 +155,7 @@ namespace Snake
                 LogicIDs.SnakeHeadSouth => new Point(_playerPosition.X, _playerPosition.Y + 1),
                 LogicIDs.SnakeHeadEast => new Point(_playerPosition.X + 1, _playerPosition.Y),
                 LogicIDs.SnakeHeadWest => new Point(_playerPosition.X - 1, _playerPosition.Y),
+                _ => _playerPosition,
             };
             // Get the ID of the cell in front of the snake
             LogicIDs facing_ID = _gameGrid.GetIDAtPosition(facing_position);
@@ -134,34 +163,53 @@ namespace Snake
             // If the snake is going to crash
             if (facing_ID == LogicIDs.SnakeBody)
             {
-                // TODO: Kill the snake.
-                
+                // TODO: End the game on a loss.
+
             }
 
             // Move the snake head forward.
             _gameGrid.SetIDAtPosition(facing_position, _headDirection);
-            //      Detect if the previous cell ID was an apple.
+
+            // Pseudocode for what needs to be done:
+            // Set _playerPosition (which is the old snake position) to be a body piece. Do this with _gameGrid.SetIDAtPosition().
+            // If the facing_id == LogcIDs.Apple
+            //      Increment _snakeLength by 1.
+
+            // Finally, i can talk about the "movement pathfinding" thing I've been hyping up.
+            // Each body segment of the snake has something called "WhoAmI." This is an integer that tracks what body segment this is from the snake.
+            // The count starts at 0 (following the concept of indices starting at 0), and goes up by one for each body piece the snake extends close to the end.
+            // Since each segment of the snake gets a higher WhoAmI count closer to the tail, we can find the end of the snake by just looking for higher and higher counts.
+            // All we do to move the snake is just delete the one closest to the end.
+
+            // What would this algorithm entail?
+            // Firstly, it would be recursive. Meaning, we would start from one point (the head of the snake), and continue searching if we found a snake segment.
+            // Start from a given position (the snake head).
+            // Check the cell to the North of the current position. Is it a snake body segment with WhoAmI greater than or equal to* the current cell's WhoAmI?
+            //      If yes, begin the search from that cell.
+            // If no, check the cell to the East. Is it a snake body with WhoAmI >= the current cell's WhoAmI?
+            //      If yes, begin the search from that cell.
+            // This repeats for all four cardinal directions. This will *ALWAYS* find the end of the snake. This is why I referred to it as pathfinding: This is the backbone of all pathing algorithms.
+            // Once we reach the end of the snake, we then check the length of the snake, stored as _snakeLength.
+            // If we did more operations than the _snakeLength, then that means the snake moved instead of growing (from eating an apple).
+            // Since the snake moved, we should turn the final segment into an empty space.
+            // * I said greater than or equal to here. This is not a mistake: We are checking for a body segment with equal to, or +1 WhoAmI of the current cell.
+            //      This is done because there may end up being duplicate WhoAmI's, especially near the front of the snake.
+
+            // While the pathfinding algorithm is being done, we can store the positions of the cells that were checked. We can then invert this for the creation of a new apple.
+            // This gives us all positions of empty cells at *no* additional cost to the player's computing power.
+
+
+
+
+            //      Detect if the facing ID was an apple
             //          Extend the snake's length if the snake did eat an apple.
             //      Move the rest of the snake via pathfinding (talk to Scott about this)
             //          In order to perform this, all non-empty cells will have to be investigated. This will be done in tandem with creating an apple.
             // If an apple no longer exists, generate a new one.
-            // Wait a given amount of time
+
             // TODO: Make the given amount of time be variable.
             //
             // END GAME LOGIC!
-        }
-
-        protected override void Draw(GameTime gameTime)
-        {
-            _spriteBatch.Begin();
-
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            // TODO: Add your drawing code here
-            _gameGrid.DrawGrid(_spriteBatch);
-
-
-            _spriteBatch.End();
         }
     }
 }
