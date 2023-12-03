@@ -86,5 +86,45 @@ namespace Snake.Components
                 cell.DrawCell(spriteBatch);
             }
         }
+        /// <summary>
+        /// Recursively finds the tail of the snake. Returns the <see cref="Point"/> of the tail location
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="whoAmI"></param>
+        /// <returns></returns>
+        public Point PathFind(Point position, int whoAmI)
+        {
+            bool found_tail = false;
+            int checking_whoAmI = 0;
+            Point checking_position = position;
+            
+            while (!found_tail)
+            {
+                // Check the cell north
+                checking_whoAmI = CellArray[checking_position.X, checking_position.Y - 1].WhoAmI;
+                if (checking_whoAmI == whoAmI || checking_whoAmI == whoAmI + 1)
+                {
+                    checking_position = new(checking_position.X, checking_position.Y - 1);
+                }
+                // Check the cell south
+                checking_whoAmI = CellArray[checking_position.X, checking_position.Y + 1].WhoAmI;
+                if (checking_whoAmI == whoAmI || checking_whoAmI == whoAmI + 1)
+                {
+                    checking_position = new(checking_position.X, checking_position.Y + 1);
+                }
+                // Check the cell east
+                checking_whoAmI = CellArray[checking_position.X + 1, checking_position.Y].WhoAmI;
+                if (checking_whoAmI == whoAmI || checking_whoAmI == whoAmI + 1)
+                {
+                    checking_position = new(checking_position.X + 1, checking_position.Y);
+                }
+                // Check the cell west
+                checking_whoAmI = CellArray[checking_position.X - 1, checking_position.Y].WhoAmI;
+                if (checking_whoAmI == whoAmI || checking_whoAmI == whoAmI + 1)
+                {
+                    checking_position = new(checking_position.X - 1, checking_position.Y);
+                }
+            }
+        }
     }
 }
