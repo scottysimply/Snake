@@ -8,30 +8,31 @@ namespace Snake
 {
     public class Game1 : Game
     {
+        // Runtime variables
         public Rectangle Dimensions { get; set; }
         private Grid _gameGrid;
         private GameState _gameState;
+        Random _rand;
 
+        // Player variables
         private Point _playerPosition;
         private bool _hasGraceBeenGiven;
         private LogicIDs _headDirection;
         private int _score;
 
-        private LogicIDs _bufferedInput;
-
+        // Dialog box variables
         DialogBox _currentDialog;
         private Rectangle _dialogDimensions;
 
-
+        // Game internal variables
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+        // Input related functions
         private InputHandler _inputHandler;
         private int _stepTimer;
         private int _framesPerStep;
-
-        Random _rand;
-
+        private LogicIDs _bufferedInput;
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
