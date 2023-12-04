@@ -10,10 +10,15 @@ namespace Snake
     {
         public Rectangle Dimensions { get; set; }
         private Grid _gameGrid;
+        private GameState _gameState;
 
         private Point _playerPosition;
+        private bool _hasGraceBeenGiven;
         private LogicIDs _headDirection;
-        private int _snakeLength;
+        private int _score;
+
+        DialogBox _currentDialog;
+        private Rectangle _dialogDimensions;
 
 
         private GraphicsDeviceManager _graphics;
@@ -21,6 +26,9 @@ namespace Snake
 
         private InputHandler _inputHandler;
         private int _stepTimer;
+        private int _framesPerStep;
+
+        Random _rand;
 
         public Game1()
         {
@@ -31,34 +39,46 @@ namespace Snake
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
-            _inputHandler = new();
-            _stepTimer = 0;
+            // Initializing the game's properties
+            SetupGame();
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            // Set Dimensions of the window and game
+            // Set Dimensions of the window and game. This can't be done in initialize for some reason.
             _graphics.PreferredBackBufferHeight = 768;
             _graphics.PreferredBackBufferWidth = 1024;
             _graphics.ApplyChanges();
             Dimensions = Window.ClientBounds;
             _gameGrid = new(20, 15, Dimensions.Size);
 
+            // Set dialog box dimensions
+            _dialogDimensions = new((int)(Dimensions.Width / 2 - 0.25f * Dimensions.Width),
+                                    (int)(Dimensions.Height / 2 - 0.25f * Dimensions.Height),
+                                    Dimensions.Width / 2,
+                                    Dimensions.Height / 4);
+
+            // Setting the dialog box.
+            _currentDialog = new DialogBox(_dialogDimensions, "Press space to begin.\nUse WASD or arrow keys to move.");
+
             // Create the initial snake.
             _playerPosition = _gameGrid.SpawnSnake();
-            _snakeLength = 3;
+
+            // Spawn first apple.
+            _gameGrid.SpawnAnApple(_rand);
 
             // Initialize the SpriteBatch object (does the rendering)
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // Load sprites
-            TextureList.TBlankCell = Content.Load<Texture2D>("BlankCell");
-            TextureList.TApple = Content.Load<Texture2D>("Apple");
-            TextureList.TSnake = Content.Load<Texture2D>("Snake");
+            AssetList.TBlankCell = Content.Load<Texture2D>("BlankCell");
+            AssetList.TApple = Content.Load<Texture2D>("Apple");
+            AssetList.TSnake = Content.Load<Texture2D>("Snake");
+            AssetList.BlankSquare = Content.Load<Texture2D>("EmptySquare");
+            AssetList.ArialLarge = Content.Load<SpriteFont>("ArialLarge");
+            AssetList.ArialSmall = Content.Load<SpriteFont>("ArialSmall");
         }
 
         protected override void Update(GameTime gameTime)
@@ -67,45 +87,42 @@ namespace Snake
             // Completed: Get the current state of the keyboard.
             _inputHandler.QueryInput();
 
+            if (_gameState == GameState.Inactive)
+            {
+                InactiveLogic();
+            }
+            else
+            {
+                // Run all movement related checks
+                HandleMovement();
+
+                // Run game logic if there is a valid time step for it.
+                if (_stepTimer > 10)
+                {
+                    GameLogic(gameTime);
+                    _stepTimer = 0;
+                }
+                _stepTimer++;
+            }
+        }
+        private void InactiveLogic()
+        {
+            if (_inputHandler.IsKeyPressed(Keys.Space))
+            {
+                _gameState = GameState.Playing;
+                _currentDialog = null;
+            }
+        }
+        private void HandleMovement()
+        {
             // Add killswitch activated via escape:
             if (_inputHandler.IsKeyHeld(Keys.Escape))
             {
                 Exit();
             }
 
-            // Run game logic if there is a valid time step for it.
-            if (_stepTimer > 30)
-            {
-                GameLogic(gameTime);
-                _stepTimer = 0;
-            }
-            _stepTimer++;
-        }
-
-        protected override void Draw(GameTime gameTime)
-        {
-            _spriteBatch.Begin();
-
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            // TODO: Add your drawing code here
-            _gameGrid.DrawGrid(_spriteBatch);
-
-
-            _spriteBatch.End();
-        }
-        private void GameLogic(GameTime gameTime)
-        {
-            // Get the direction of the snake
-            _headDirection = _gameGrid.GetIDAtPosition(_playerPosition);
-
-            // IMPORTANT NOTE:
-            // I know that object oriented programming is great, and shrimplifies the creation of games. However, it leads to a lot of calls to code that may not be fully understood.
-            // For the sake of this project, all the update logic should be mostly barebones in this update loop. Make sure it's commented to make clear what it does.
-
             // Check if WASD or Arrow Keys were pressed.
             //      If applicable, change the snake head's direction.
-
             // If up is pressed
             if (_inputHandler.IsKeyHeld(Keys.W) || _inputHandler.IsKeyPressed(Keys.Up))
             {
@@ -148,6 +165,51 @@ namespace Snake
                     _headDirection = LogicIDs.SnakeHeadEast;
                 }
             }
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            _spriteBatch.Begin();
+
+            GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            _gameGrid.DrawGrid(_spriteBatch);
+            if (_currentDialog is not null)
+            {
+                _currentDialog.Draw(_spriteBatch);
+            }
+
+            // Draw current score:
+            Vector2 text_offset = AssetList.ArialSmall.MeasureString($"Score: {_score}");
+            Vector2 draw_position = new Vector2(Dimensions.Width - 12 - text_offset.X, 4 + text_offset.Y / 2);
+            _spriteBatch.DrawString(AssetList.ArialSmall, $"Score: {_score}", draw_position, Color.WhiteSmoke);
+
+            _spriteBatch.End();
+        }
+        private void SetupGame()
+        {
+            _gameState = GameState.Inactive;
+            _inputHandler = new();
+            _stepTimer = 0;
+            _rand = new();
+            _score = 0;
+            _framesPerStep = 15;
+        }
+        private void Crashed()
+        {
+            _currentDialog = new DialogBox(_dialogDimensions, $"Game over. Your score was {_score}.\nPress space to restart.");
+
+            // Prepare the game board.
+            _gameGrid.ClearGrid();
+            _playerPosition = _gameGrid.SpawnSnake();
+            _gameGrid.SpawnAnApple(_rand);
+            SetupGame();
+        }
+        private void GameLogic(GameTime gameTime)
+        {
+            // Get the direction of the snake
+            _headDirection = _gameGrid.GetIDAtPosition(_playerPosition);
+
             // Get the position of the cell in front of the snake
             Point facing_position = (_headDirection) switch
             {
@@ -157,27 +219,60 @@ namespace Snake
                 LogicIDs.SnakeHeadWest => new Point(_playerPosition.X - 1, _playerPosition.Y),
                 _ => _playerPosition,
             };
+            // If snake is outside the game.
+            if (facing_position.X < 0 || facing_position.X >= _gameGrid.Size.X || facing_position.Y < 0 || facing_position.Y >= _gameGrid.Size.Y)
+            {
+                // In snake, you usually have grace frames when you're about to crash. To simulate this, I will allow 1 extra game step to re-adjust. If the input still isn't given, the game is lost.
+                if (!_hasGraceBeenGiven)
+                {
+                    _hasGraceBeenGiven = true;
+                    return;
+                }
+                Crashed();
+                return;
+            }
+
             // Get the ID of the cell in front of the snake
             LogicIDs facing_ID = _gameGrid.GetIDAtPosition(facing_position);
-
-            // If the snake is going to crash
+            
+            // Also have to check for this crash.
             if (facing_ID == LogicIDs.SnakeBody)
             {
-                // TODO: End the game on a loss.
+                if (!_hasGraceBeenGiven)
+                {
+                    _hasGraceBeenGiven = true;
+                    return;
+                }
+                Crashed();
+                return;
             }
 
             // Move the snake head forward.
             _gameGrid.SetIDAtPosition(facing_position, _headDirection);
+            _gameGrid.SetWhoAmIAtPosition(facing_position, 0);
 
             // Pseudocode for what needs to be done:
             // Set _playerPosition (which is the old snake position) to be a LogicIDs.SnakeBody. Do this with _gameGrid.SetIDAtPosition().
             _gameGrid.SetIDAtPosition(_playerPosition, LogicIDs.SnakeBody);
-            // If the facing_id == LogicIDs.Apple
-            //      Increment _snakeLength by 1.
+            // Correct the snake's order and find the tail.
+            Point tail_location = _gameGrid.PathFind(facing_position);
+            // If the snake ate an apple, spawn a new one. Increase the score. Else, remove the tail of the snake (the snake moved!)
             if (facing_ID == LogicIDs.Apple)
             {
-                _snakeLength += 1;
+                _gameGrid.SpawnAnApple(_rand);
+                _score++;
+                // Do frame/step timer calculations to speed up the game.
+
             }
+            else
+            {
+                _gameGrid.SetIDAtPosition(tail_location, LogicIDs.Empty);
+                _gameGrid.SetWhoAmIAtPosition(tail_location, -1);
+            }
+
+            // Update the player's position:
+            _playerPosition = facing_position;
+            _hasGraceBeenGiven = false;
             
             // Finally, i can talk about the "movement pathfinding" thing I've been hyping up.
             // Each body segment of the snake has something called "WhoAmI." This is an integer that tracks what body segment this is from the snake.
@@ -198,10 +293,6 @@ namespace Snake
             // Since the snake moved, we should turn the final segment into an empty space.
             // * I said greater than or equal to here. This is not a mistake: We are checking for a body segment with equal to, or +1 WhoAmI of the current cell.
             //      This is done because there may end up being duplicate WhoAmI's, especially near the front of the snake.
-
-            // While the pathfinding algorithm is being done, we can store the positions of the cells that were checked. We can then invert this for the creation of a new apple.
-            // This gives us all positions of empty cells at *no* additional cost to the player's computing power.
-
 
 
 
