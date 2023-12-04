@@ -31,13 +31,13 @@ namespace Snake.Components
             switch (ID)
             {
                 case LogicIDs.Apple:
-                    spriteBatch.Draw(TextureList.TApple, Dimensions, Color.White);
+                    spriteBatch.Draw(AssetList.TApple, Dimensions, Color.White);
                     break;
                 case LogicIDs.Empty:
-                    spriteBatch.Draw(TextureList.TBlankCell, Dimensions, Color.White);
+                    spriteBatch.Draw(AssetList.TBlankCell, Dimensions, Color.White);
                     break;
                 default:
-                    spriteBatch.Draw(TextureList.TSnake, Dimensions, Color.White);
+                    spriteBatch.Draw(AssetList.TSnake, Dimensions, Color.White);
                     break;
             }
         }

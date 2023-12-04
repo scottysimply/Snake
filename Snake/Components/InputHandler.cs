@@ -55,6 +55,5 @@ namespace Snake.Components
             _oldState = _currentState;
             _currentState = Keyboard.GetState();
         }
-
     }
 }
