@@ -17,6 +17,8 @@ namespace Snake
         private LogicIDs _headDirection;
         private int _score;
 
+        private LogicIDs _bufferedInput;
+
         DialogBox _currentDialog;
         private Rectangle _dialogDimensions;
 
@@ -75,7 +77,11 @@ namespace Snake
             // Load sprites
             AssetList.TBlankCell = Content.Load<Texture2D>("BlankCell");
             AssetList.TApple = Content.Load<Texture2D>("Apple");
-            AssetList.TSnake = Content.Load<Texture2D>("Snake");
+            AssetList.TSnakeBody = Content.Load<Texture2D>("SnakeBody");
+            AssetList.TSnakeHeadNorth = Content.Load<Texture2D>("SnakeHeadNorth");
+            AssetList.TSnakeHeadSouth = Content.Load<Texture2D>("SnakeHeadSouth");
+            AssetList.TSnakeHeadEast = Content.Load<Texture2D>("SnakeHeadEast");
+            AssetList.TSnakeHeadWest = Content.Load<Texture2D>("SnakeHeadWest");
             AssetList.BlankSquare = Content.Load<Texture2D>("EmptySquare");
             AssetList.ArialLarge = Content.Load<SpriteFont>("ArialLarge");
             AssetList.ArialSmall = Content.Load<SpriteFont>("ArialSmall");
@@ -97,8 +103,10 @@ namespace Snake
                 HandleMovement();
 
                 // Run game logic if there is a valid time step for it.
-                if (_stepTimer > 10)
+                if (_stepTimer > _framesPerStep)
                 {
+                    _gameGrid.SetIDAtPosition(_playerPosition, _bufferedInput);
+                    _headDirection = _bufferedInput;
                     GameLogic(gameTime);
                     _stepTimer = 0;
                 }
@@ -131,8 +139,7 @@ namespace Snake
                 // To change the direction of the snake, call _gameGrid.SetIDAtPosition(_playerPosition, LogicIDs.[id here]).
                 if (_headDirection == LogicIDs.SnakeHeadWest || _headDirection == LogicIDs.SnakeHeadEast)
                 {
-                    _gameGrid.SetIDAtPosition(_playerPosition, LogicIDs.SnakeHeadNorth);
-                    _headDirection = LogicIDs.SnakeHeadNorth;
+                    _bufferedInput = LogicIDs.SnakeHeadNorth;
                 }
             }
             // If down is pressed
@@ -141,8 +148,7 @@ namespace Snake
                 // If snake is facing left or right, make the snake face down.
                 if (_headDirection == LogicIDs.SnakeHeadWest || _headDirection == LogicIDs.SnakeHeadEast)
                 {
-                    _gameGrid.SetIDAtPosition(_playerPosition, LogicIDs.SnakeHeadSouth);
-                    _headDirection = LogicIDs.SnakeHeadSouth;
+                    _bufferedInput = LogicIDs.SnakeHeadSouth;
                 }
             }
             // If left is pressed
@@ -151,8 +157,7 @@ namespace Snake
                 // If snake is facing up or down, make the snake face left.
                 if (_headDirection == LogicIDs.SnakeHeadSouth || _headDirection == LogicIDs.SnakeHeadNorth)
                 {
-                    _gameGrid.SetIDAtPosition(_playerPosition, LogicIDs.SnakeHeadWest);
-                    _headDirection = LogicIDs.SnakeHeadWest;
+                    _bufferedInput = LogicIDs.SnakeHeadWest;
                 }
             }
             // If right is pressed
@@ -161,15 +166,14 @@ namespace Snake
                 // If snake is facing up or down, make the snake face right.
                 if (_headDirection == LogicIDs.SnakeHeadSouth || _headDirection == LogicIDs.SnakeHeadNorth)
                 {
-                    _gameGrid.SetIDAtPosition(_playerPosition, LogicIDs.SnakeHeadEast);
-                    _headDirection = LogicIDs.SnakeHeadEast;
+                    _bufferedInput = LogicIDs.SnakeHeadEast;
                 }
             }
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            _spriteBatch.Begin();
+            _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
 
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
@@ -188,12 +192,13 @@ namespace Snake
         }
         private void SetupGame()
         {
+            _bufferedInput = LogicIDs.SnakeHeadEast;
             _gameState = GameState.Inactive;
             _inputHandler = new();
             _stepTimer = 0;
             _rand = new();
             _score = 0;
-            _framesPerStep = 15;
+            _framesPerStep = 12;
         }
         private void Crashed()
         {
@@ -262,7 +267,10 @@ namespace Snake
                 _gameGrid.SpawnAnApple(_rand);
                 _score++;
                 // Do frame/step timer calculations to speed up the game.
-
+                if ((_score + 1) % 10 == 0 && _framesPerStep > 4)
+                {
+                    _framesPerStep -= 1;
+                }
             }
             else
             {
