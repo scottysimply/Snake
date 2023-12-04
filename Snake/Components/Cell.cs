@@ -28,18 +28,34 @@ namespace Snake.Components
         }
         public void DrawCell(SpriteBatch spriteBatch)
         {
-            switch (ID)
+
+            if (ID == LogicIDs.Apple)
             {
-                case LogicIDs.Apple:
-                    spriteBatch.Draw(AssetList.TApple, Dimensions, Color.White);
-                    break;
-                case LogicIDs.Empty:
-                    spriteBatch.Draw(AssetList.TBlankCell, Dimensions, Color.White);
-                    break;
-                default:
-                    spriteBatch.Draw(AssetList.TSnake, Dimensions, Color.White);
-                    break;
+                spriteBatch.Draw(AssetList.TApple, Dimensions, Color.White);
             }
+            else if (WhoAmI > 0)
+            {
+                spriteBatch.Draw(AssetList.TSnakeBody, Dimensions, Color.White);
+            }
+            else if (WhoAmI == 0)
+            {
+                switch (ID)
+                {
+                    case LogicIDs.SnakeHeadSouth:
+                        spriteBatch.Draw(AssetList.TSnakeHeadSouth, Dimensions, Color.White);
+                        break;
+                    case LogicIDs.SnakeHeadEast:
+                        spriteBatch.Draw(AssetList.TSnakeHeadEast, Dimensions, Color.White);
+                        break;
+                    case LogicIDs.SnakeHeadWest:
+                        spriteBatch.Draw(AssetList.TSnakeHeadWest, Dimensions, Color.White);
+                        break;
+                    default:
+                        spriteBatch.Draw(AssetList.TSnakeHeadNorth, Dimensions, Color.White);
+                        break;
+                }
+            }
+            spriteBatch.Draw(AssetList.TBlankCell, Dimensions, Color.White);
         }
     }
 }
