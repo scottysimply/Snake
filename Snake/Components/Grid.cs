@@ -1,4 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Snake.Components
@@ -38,6 +40,17 @@ namespace Snake.Components
             }
             Size = new(num_cols, num_rows);
         }
+        public void ClearGrid()
+        {
+            for (int y = 0; y < Size.Y; y++)
+            {
+                for (int x = 0; x < Size.X; x++)
+                {
+                    CellArray[x, y].ID = 0;
+                    CellArray[x, y].WhoAmI = -1;
+                }
+            }
+        }
         public Point SpawnSnake()
         {
             int spawnX = Size.X / 2 + 1 - 4;
@@ -53,6 +66,21 @@ namespace Snake.Components
             CellArray[spawnX - 3, centerY].WhoAmI = 2;
 
             return CellArray[spawnX - 1, centerY].Coordinates;
+        }
+        public void SpawnAnApple(Random random)
+        {
+            List<Point> grid_points = new();
+            foreach (Cell cell in CellArray)
+            {
+                if (cell.ID == LogicIDs.Empty)
+                {
+                    grid_points.Add(cell.Coordinates);
+                }
+            }
+            int index = random.Next(0, grid_points.Count);
+
+            SetIDAtPosition(grid_points[index], LogicIDs.Apple);
+
         }
         /// <summary>
         /// Retrieves the ID at a given position.
@@ -72,6 +100,24 @@ namespace Snake.Components
         {
             CellArray[position.X, position.Y].ID = ID;
         }
+        /// <summary>
+        /// Retrieves the WhoAmI at a given position.
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        public int GetWhoAmIAtPosition(Point position)
+        {
+            return CellArray[position.X, position.Y].WhoAmI;
+        }
+        /// <summary>
+        /// Given a position in the grid, set the WhoAmI at that position to the given WhoAmI.
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="whoAmI"></param>
+        public void SetWhoAmIAtPosition(Point position, int whoAmI)
+        {
+            CellArray[position.X, position.Y].WhoAmI = whoAmI;
+        }
         public void ResetGrid()
         {
             foreach (Cell cell in CellArray)
@@ -89,42 +135,78 @@ namespace Snake.Components
         /// <summary>
         /// Recursively finds the tail of the snake. Returns the <see cref="Point"/> of the tail location
         /// </summary>
-        /// <param name="position"></param>
-        /// <param name="whoAmI"></param>
+        /// <param name="position">The position to begin checking from.</param>
         /// <returns></returns>
-        public Point PathFind(Point position, int whoAmI)
+        public Point PathFind(Point starting_position)
         {
             bool found_tail = false;
-            int checking_whoAmI = 0;
-            Point checking_position = position;
-            
+            Point previously_checked_position = starting_position;
+            int previously_checked_whoAmI = 0;
+            Point currently_checking_position;
+            int currently_checking_whoAmI;
+
             while (!found_tail)
             {
-                // Check the cell north
-                checking_whoAmI = CellArray[checking_position.X, checking_position.Y - 1].WhoAmI;
-                if (checking_whoAmI == whoAmI || checking_whoAmI == whoAmI + 1)
+                // Begin by checking north. Surrounded in a check to make sure this is in range!
+                if (previously_checked_position.Y > 0)
                 {
-                    checking_position = new(checking_position.X, checking_position.Y - 1);
+                    currently_checking_position = new(previously_checked_position.X, previously_checked_position.Y - 1);
+                    currently_checking_whoAmI = GetWhoAmIAtPosition(currently_checking_position);
+                    if (previously_checked_whoAmI == currently_checking_whoAmI)
+                    {
+                        currently_checking_whoAmI++;
+                        SetWhoAmIAtPosition(currently_checking_position, currently_checking_whoAmI);
+                        previously_checked_position = currently_checking_position;
+                        previously_checked_whoAmI = currently_checking_whoAmI;
+                        continue;
+                    }
                 }
-                // Check the cell south
-                checking_whoAmI = CellArray[checking_position.X, checking_position.Y + 1].WhoAmI;
-                if (checking_whoAmI == whoAmI || checking_whoAmI == whoAmI + 1)
+                // Check south. Surrounded in a check to make sure this is in range!
+                if (previously_checked_position.Y + 1 < Size.Y)
                 {
-                    checking_position = new(checking_position.X, checking_position.Y + 1);
+                    currently_checking_position = new(previously_checked_position.X, previously_checked_position.Y + 1);
+                    currently_checking_whoAmI = GetWhoAmIAtPosition(currently_checking_position);
+                    if (previously_checked_whoAmI == currently_checking_whoAmI)
+                    {
+                        currently_checking_whoAmI++;
+                        SetWhoAmIAtPosition(currently_checking_position, currently_checking_whoAmI);
+                        previously_checked_position = currently_checking_position;
+                        previously_checked_whoAmI = currently_checking_whoAmI;
+                        continue;
+                    }
                 }
-                // Check the cell east
-                checking_whoAmI = CellArray[checking_position.X + 1, checking_position.Y].WhoAmI;
-                if (checking_whoAmI == whoAmI || checking_whoAmI == whoAmI + 1)
+                // Check west. Surrounded in a check to make sure this is in range!
+                if (previously_checked_position.X > 0)
                 {
-                    checking_position = new(checking_position.X + 1, checking_position.Y);
+                    currently_checking_position = new(previously_checked_position.X - 1, previously_checked_position.Y);
+                    currently_checking_whoAmI = GetWhoAmIAtPosition(currently_checking_position);
+                    if (previously_checked_whoAmI == currently_checking_whoAmI)
+                    {
+                        currently_checking_whoAmI++;
+                        SetWhoAmIAtPosition(currently_checking_position, currently_checking_whoAmI);
+                        previously_checked_position = currently_checking_position;
+                        previously_checked_whoAmI = currently_checking_whoAmI;
+                        continue;
+                    }
                 }
-                // Check the cell west
-                checking_whoAmI = CellArray[checking_position.X - 1, checking_position.Y].WhoAmI;
-                if (checking_whoAmI == whoAmI || checking_whoAmI == whoAmI + 1)
+                // Check east. Surrounded in a check to make sure this is in range!
+                if (previously_checked_position.X + 1 < Size.X)
                 {
-                    checking_position = new(checking_position.X - 1, checking_position.Y);
+                    currently_checking_position = new(previously_checked_position.X + 1, previously_checked_position.Y);
+                    currently_checking_whoAmI = GetWhoAmIAtPosition(currently_checking_position);
+                    if (previously_checked_whoAmI == currently_checking_whoAmI)
+                    {
+                        currently_checking_whoAmI++;
+                        SetWhoAmIAtPosition(currently_checking_position, currently_checking_whoAmI);
+                        previously_checked_position = currently_checking_position;
+                        previously_checked_whoAmI = currently_checking_whoAmI;
+                        continue;
+                    }
                 }
+                // If no snake body was found, we found the end of the snake!
+                found_tail = true;
             }
+            return previously_checked_position;
         }
     }
 }
