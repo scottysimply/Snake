@@ -283,7 +283,7 @@ namespace Snake
             _playerPosition = facing_position;
             _hasGraceBeenGiven = false;
             
-            // Finally, i can talk about the "movement pathfinding" thing I've been hyping up.
+            // Finally, i can talk about the "movement pathfinding" thing I've been hyping up (through _gameGrid.PathFind())
             // Each body segment of the snake has something called "WhoAmI." This is an integer that tracks what body segment this is from the snake.
             // The count starts at 0 (following the concept of indices starting at 0), and goes up by one for each body piece the snake extends close to the end.
             // Since each segment of the snake gets a higher WhoAmI count closer to the tail, we can find the end of the snake by just looking for higher and higher counts.
